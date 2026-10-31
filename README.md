@@ -32,7 +32,9 @@ are from the name menu in the top bar.
 the Big Board. Gold stars mark Short Board players. Each player appears once per game even if
 they have multiple board roles, and player names open their profiles. Browse dates in Eastern
 time, including daylight-saving changes. Scores are snapshots with a visible update time, without
-a live minute or event feed. Club membership does not assert a start, bench place or appearance.
+a live minute or event feed. Within each status section, games sort by most Short Board players,
+then most Big Board players, then earliest kickoff. Club membership does not assert a start,
+bench place or appearance.
 
 Set `APIFOOTBALL_KEY` on the server for a direct API-Sports account with current-season access.
 Alternatively, set `APIFOOTBALL_RAPIDAPI_KEY` for the RapidAPI channel; the direct key takes

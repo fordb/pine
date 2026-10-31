@@ -10,6 +10,12 @@ let followingToday = true;
 export function fixtureGroup(status) {
   return STARTED.has(status) ? "In progress" : FINISHED.has(status) ? "Finished" : ["NS", "TBD"].includes(status) ? "Upcoming" : "Other fixtures";
 }
+function boardPriority(a, b) {
+  const shortCount = (game) => game.players.filter((p) => p.short_board).length;
+  // Short Board players also belong to the Big Board, so total count breaks ties.
+  return shortCount(b) - shortCount(a) || b.players.length - a.players.length
+    || a.date.localeCompare(b.date) || a.id - b.id;
+}
 function gameHtml(game) {
   const finished = FINISHED.has(game.status), active = STARTED.has(game.status);
   const scored = (finished || active) && game.goals.home != null && game.goals.away != null;
@@ -33,7 +39,7 @@ export function resultsHtml(data) {
   const college = data.college_players ? '<div class="banner info">College games aren’t supported yet. API-Football doesn’t cover NCAA soccer.</div>' : "";
   const groups = ["In progress", "Upcoming", "Finished", "Other fixtures"];
   const games = groups.map((group) => {
-    const rows = data.games.filter((game) => fixtureGroup(game.status) === group);
+    const rows = data.games.filter((game) => fixtureGroup(game.status) === group).sort(boardPriority);
     return rows.length ? `<section class="sched-section"><h2>${group} <span>${rows.length} ${rows.length === 1 ? "game" : "games"}</span></h2>${rows.map(gameHtml).join("")}</section>` : "";
   }).join("");
   const empty = data.warnings.length ? "The schedule is unavailable or incomplete. Try again later."

@@ -168,6 +168,22 @@ test("active and completed games show snapshot scores without a live minute or i
   assert.match(freshnessText({ ...data, cache_minutes: 360 }), /few hours/);
 });
 
+test("each schedule section prioritizes Short Board count, then Big Board count, then kickoff", () => {
+  const fixture = reduceFixture(leagueGames[0]);
+  const game = (id, short, big, hour) => ({ ...fixture, id, date: `2026-10-31T${hour}:00:00Z`,
+    home: { id, name: `Team ${id}` }, players: Array.from({ length: short + big }, (_, i) => ({
+      id: id * 10 + i, name: `Example ${id}-${i}`, short_board: i < short,
+    })) });
+  const games = [game(1, 0, 5, "10"), game(2, 1, 0, "11"), game(3, 1, 2, "15"),
+    game(4, 2, 0, "19"), game(5, 1, 2, "14")];
+  for (const status of ["NS", "2H", "FT"]) {
+    const html = resultsHtml({ configured: true, total_players: 1, warnings: [], unmatched: [],
+      games: games.map((g) => ({ ...g, status })) });
+    assert.deepEqual([...html.matchAll(/aria-label="Team (\d+) versus/g)].map((m) => Number(m[1])), [4, 5, 3, 2, 1]);
+  }
+  assert.deepEqual(games.map((g) => g.id), [1, 2, 3, 4, 5], "rendering doesn't mutate the API response");
+});
+
 test("schedule matches both teams by league and stable ID, includes cups, preserves 0–0, and honors Eastern dates", async () => {
   const t = serviceSetup();
   const result = await t.service.day(players, "2026-10-31");
